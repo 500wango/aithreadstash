@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>AI ThreadStash - Conversation Preview</title>
+    
+    <!-- Prism.js CSS (Tomorrow Night theme) - CRITICAL DEPENDENCY -->
+    <link rel="stylesheet" href="libs/prism/prism-tomorrow.min.css">
+    
+    <!-- Local Stylesheet -->
+    <link rel="stylesheet" href="preview.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    pre[class*="language-"] {
+        background: #000000 !important;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <img src="../assets/logo.png" alt="AI ThreadStash" class="full-logo">
+            </div>
+            <div class="toolbar-right">
+                <button id="downloadMd" class="toolbar-btn">
+                    <span class="btn-icon">📄</span>
+                    <span class="btn-text" data-i18n="downloadMd">下载 Markdown</span>
+                </button>
+                <button id="downloadJson" class="toolbar-btn">
+                    <span class="btn-icon">📋</span>
+                    <span class="btn-text" data-i18n="downloadJson">下载 JSON</span>
+                </button>
+                <button id="copyRichText" class="toolbar-btn">
+                    <span class="btn-icon">📝</span>
+                    <span class="btn-text" data-i18n="copyRichText">复制为富文本</span>
+                </button>
+                <button id="printContent" class="toolbar-btn">
+                    <span class="btn-icon">📄</span>
+                    <span class="btn-text" data-i18n="print">Print to PDF</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="header">
+            <div class="conversation-info">
+                <h2 id="conversationTitle" data-i18n="loading">加载中...</h2>
+                <div class="metadata">
+                    <span id="exportTime"></span>
+                    <span>•</span>
+                    <a id="sourceLink" href="#" target="_blank" data-i18n="source">查看原始对话</a>
+                </div>
+            </div>
+        </div>
+        
+        <div id="conversationContent" class="conversation-content">
+            <div class="loading" data-i18n="loadingConversation">正在加载对话内容...</div>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+    
+    <!-- Prism.js Core and Autoloader - CRITICAL DEPENDENCY -->
+    <script src="libs/prism/prism-core.min.js"></script>
+    <script src="libs/prism/prism-autoloader.min.js"></script>
+    
+    <script src="libs/showdown.min.js"></script>
+    
+    <!-- Internationalization -->
+    <script src="i18n.js"></script>
+    
+    <script src="preview-config.js"></script>
+
+    <!-- Local Preview Script -->
+    <script src="preview.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "AI ThreadStash",
+  "version": "1.0.0",
+  "description": "The essential archive tool for AI conversations. One-click export for ChatGPT & DeepSeek chats to Markdown, PDF, & JSON.",
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "AI ThreadStash - Export ChatGPT&Deepseek Conversations to Markdown, JSON and PDF"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; style-src 'self' 'unsafe-inline'"
+  },
+  "host_permissions": [
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://chat.deepseek.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*"],
+      "js": ["content-scripts/chatgpt.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://chat.deepseek.com/*"],
+      "js": ["content-scripts/deepseek-clean.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background/service-worker.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["preview/preview.html", "preview/preview.css", "preview/preview.js", "help.html", "preview/libs/prism/*.js", "preview/libs/showdown.min.js"],
+      "matches": ["https://chat.openai.com/*", "https://chatgpt.com/*", "https://chat.deepseek.com/*", "chrome-extension://*/*"]
+    }
+  ]
+}
