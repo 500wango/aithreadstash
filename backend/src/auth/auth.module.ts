@@ -4,9 +4,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
+import { SessionService } from './session.service';
 import { AuthController } from './auth.controller';
 import { GoogleAuthController } from './google-auth.controller';
 import { GitHubAuthController } from './github-auth.controller';
+import { GitHubMockController } from './github-mock.controller';
+import { GoogleMockController } from './google-mock.controller';
+import { GoogleSimpleController } from './google-simple.controller';
+import { GoogleOAuthSimpleService } from './google-oauth-simple.service';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
@@ -25,7 +30,7 @@ import { User } from '../database/user.entity';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, GoogleStrategy, GitHubStrategy, JwtStrategy],
-  controllers: [AuthController, GoogleAuthController, GitHubAuthController],
+  providers: [AuthService, SessionService, GoogleOAuthSimpleService, GoogleStrategy, GitHubStrategy, JwtStrategy],
+  controllers: [AuthController, GoogleAuthController, GitHubAuthController, GitHubMockController, GoogleMockController, GoogleSimpleController],
 })
 export class AuthModule {}

@@ -1,0 +1,408 @@
+import { QueryRunner, Table, TableColumn, TableForeignKey } from 'typeorm';
+import { CreateUsersTable1700000000000 } from './1700000000000-CreateUsersTable';
+import { AddOAuthFields1700000000001 } from './1700000000001-AddOAuthFields';
+import { CreateConversationsTable1735228030000 } from './1735228030000-CreateConversationsTable';
+import { AddNotionFields1735230000000 } from './1735230000000-AddNotionFields';
+import { AddStripeFields1735235000000 } from './1735235000000-AddStripeFields';
+
+describe('Database Migrations', () => {
+  let mockQueryRunner: jest.Mocked<QueryRunner>;
+  let mockTables: Map<string, Table>;
+
+  beforeEach(() => {
+    mockTables = new Map();
+    
+    mockQueryRunner = {
+      createTable: jest.fn().mockImplementation((table: Table) => {
+        mockTables.set(table.name, table);
+        return Promise.resolve();
+      }),
+      dropTable: jest.fn().mockImplementation((tableName: string) => {
+        mockTables.delete(tableName);
+        return Promise.resolve();
+      }),
+      hasTable: jest.fn().mockImplementation((tableName: string) => {
+        return Promise.resolve(mockTables.has(tableName));
+      }),
+      getTable: jest.fn().mockImplementation((tableName: string) => {
+        const table = mockTables.get(tableName);
+        return Promise.resolve(table);
+      }),
+      addColumns: jest.fn().mockImplementation((tableName: string, columns: TableColumn[]) => {
+        const table = mockTables.get(tableName);
+        if (table) {
+          table.columns.push(...columns);
+        }
+        return Promise.resolve();
+      }),
+      dropColumns: jest.fn().mockImplementation((tableName: string, columnNames: string[]) => {
+        const table = mockTables.get(tableName);
+        if (table) {
+          table.columns = table.columns.filter(col => !columnNames.includes(col.name));
+        }
+        return Promise.resolve();
+      }),
+      createForeignKey: jest.fn().mockImplementation(() => Promise.resolve()),
+      query: jest.fn().mockImplementation(() => Promise.resolve([])),
+    } as any;
+  });
+
+  describe('CreateUsersTable Migration', () => {
+    it('应该成功创建users表', async () => {
+      const migration = new CreateUsersTable1700000000000();
+      
+      await migration.up(mockQueryRunner);
+      
+      // 验证表是否存在
+      const hasTable = await mockQueryRunner.hasTable('users');
+      expect(hasTable).toBe(true);
+      
+      // 验证表结构
+      const table = await mockQueryRunner.getTable('users');
+      expect(table).toBeDefined();
+      expect(table.columns).toHaveLength(8);
+      
+      // 验证主键
+      const primaryKey = table.columns.find(col => col.isPrimary);
+      expect(primaryKey?.name).toBe('id');
+      expect(primaryKey?.type).toBe('serial');
+      
+      // 验证必填字段
+      const emailColumn = table.columns.find(col => col.name === 'email');
+      expect(emailColumn?.isUnique).toBe(true);
+      expect(emailColumn?.isNullable).toBe(false);
+      
+      const passwordColumn = table.columns.find(col => col.name === 'password');
+      expect(passwordColumn?.isNullable).toBe(false);
+      
+      // 验证枚举字段
+      const subscriptionColumn = table.columns.find(col => col.name === 'subscriptionStatus');
+      expect(subscriptionColumn?.type).toBe('enum');
+      expect(subscriptionColumn?.default).toBe("'free'");
+      
+      // 验证可空字段
+      const googleIdColumn = table.columns.find(col => col.name === 'googleId');
+      expect(googleIdColumn?.isNullable).toBe(true);
+      
+      const githubIdColumn = table.columns.find(col => col.name === 'githubId');
+      expect(githubIdColumn?.isNullable).toBe(true);
+      
+      // 验证时间戳字段
+      const createdAtColumn = table.columns.find(col => col.name === 'createdAt');
+      expect(createdAtColumn?.default).toBe('now()');
+      
+      const updatedAtColumn = table.columns.find(col => col.name === 'updatedAt');
+      expect(updatedAtColumn?.default).toBe('now()');
+    });
+
+    it('应该成功回滚users表', async () => {
+      const migration = new CreateUsersTable1700000000000();
+      
+      // 先创建表
+      await migration.up(mockQueryRunner);
+      
+      // 然后回滚
+      await migration.down(mockQueryRunner);
+      
+      // 验证表是否被删除
+      const hasTable = await mockQueryRunner.hasTable('users');
+      expect(hasTable).toBe(false);
+    });
+  });
+
+  describe('AddOAuthFields Migration', () => {
+    beforeEach(async () => {
+      // 确保users表存在
+      const migration = new CreateUsersTable1700000000000();
+      await migration.up(mockQueryRunner);
+    });
+
+    it('应该成功添加OAuth字段', async () => {
+      const migration = new AddOAuthFields1700000000001();
+      
+      await migration.up(mockQueryRunner);
+      
+      const table = await mockQueryRunner.getTable('users');
+      expect(table).toBeDefined();
+      
+      // 验证新字段
+      const firstNameColumn = table.columns.find(col => col.name === 'firstName');
+      expect(firstNameColumn?.isNullable).toBe(true);
+      expect(firstNameColumn?.type).toBe('varchar');
+      
+      const lastNameColumn = table.columns.find(col => col.name === 'lastName');
+      expect(lastNameColumn?.isNullable).toBe(true);
+      expect(lastNameColumn?.type).toBe('varchar');
+      
+      const avatarColumn = table.columns.find(col => col.name === 'avatar');
+      expect(avatarColumn?.isNullable).toBe(true);
+      expect(avatarColumn?.type).toBe('varchar');
+    });
+
+    it('应该成功回滚OAuth字段', async () => {
+      const migration = new AddOAuthFields1700000000001();
+      
+      // 先添加字段
+      await migration.up(mockQueryRunner);
+      
+      // 然后回滚
+      await migration.down(mockQueryRunner);
+      
+      const table = await mockQueryRunner.getTable('users');
+      expect(table).toBeDefined();
+      
+      // 验证字段被删除
+      const firstNameColumn = table.columns.find(col => col.name === 'firstName');
+      expect(firstNameColumn).toBeUndefined();
+      
+      const lastNameColumn = table.columns.find(col => col.name === 'lastName');
+      expect(lastNameColumn).toBeUndefined();
+      
+      const avatarColumn = table.columns.find(col => col.name === 'avatar');
+      expect(avatarColumn).toBeUndefined();
+    });
+  });
+
+  describe('CreateConversationsTable Migration', () => {
+    beforeEach(async () => {
+      // 确保users表存在（conversations依赖users）
+      const usersMigration = new CreateUsersTable1700000000000();
+      await usersMigration.up(mockQueryRunner);
+    });
+
+    it('应该成功创建conversations表', async () => {
+      const migration = new CreateConversationsTable1735228030000();
+      
+      await migration.up(mockQueryRunner);
+      
+      // 验证表是否存在
+      const hasTable = await mockQueryRunner.hasTable('conversations');
+      expect(hasTable).toBe(true);
+      
+      // 验证表结构
+      const table = await mockQueryRunner.getTable('conversations');
+      expect(table).toBeDefined();
+      expect(table.columns).toHaveLength(11);
+      
+      // 验证主键
+      const primaryKey = table.columns.find(col => col.isPrimary);
+      expect(primaryKey?.name).toBe('id');
+      expect(primaryKey?.type).toBe('serial');
+      
+      // 验证必填字段
+      const titleColumn = table.columns.find(col => col.name === 'title');
+      expect(titleColumn?.isNullable).toBe(false);
+      
+      // 验证可空字段
+      const summaryColumn = table.columns.find(col => col.name === 'summary');
+      expect(summaryColumn?.isNullable).toBe(true);
+      expect(summaryColumn?.type).toBe('text');
+      
+      // 验证JSONB字段
+      const messagesColumn = table.columns.find(col => col.name === 'messages');
+      expect(messagesColumn?.type).toBe('jsonb');
+      expect(messagesColumn?.default).toBe("'[]'");
+      
+      // 验证默认值
+      const tokenCountColumn = table.columns.find(col => col.name === 'tokenCount');
+      expect(tokenCountColumn?.default).toBe(0);
+      
+      // 验证枚举字段
+      const statusColumn = table.columns.find(col => col.name === 'status');
+      expect(statusColumn?.type).toBe('enum');
+      expect(statusColumn?.default).toBe("'active'");
+      
+      // 验证外键字段
+      const userIdColumn = table.columns.find(col => col.name === 'userId');
+      expect(userIdColumn?.type).toBe('integer');
+      expect(userIdColumn?.isNullable).toBe(false);
+      
+      // 验证外键创建被调用
+      expect(mockQueryRunner.createForeignKey).toHaveBeenCalled();
+    });
+
+    it('应该成功回滚conversations表', async () => {
+      const migration = new CreateConversationsTable1735228030000();
+      
+      // 先创建表
+      await migration.up(mockQueryRunner);
+      
+      // 然后回滚
+      await migration.down(mockQueryRunner);
+      
+      // 验证表是否被删除
+      const hasTable = await mockQueryRunner.hasTable('conversations');
+      expect(hasTable).toBe(false);
+    });
+  });
+
+  describe('AddNotionFields Migration', () => {
+    beforeEach(async () => {
+      // 确保users表存在
+      const migration = new CreateUsersTable1700000000000();
+      await migration.up(mockQueryRunner);
+    });
+
+    it('应该成功添加Notion字段', async () => {
+      const migration = new AddNotionFields1735230000000();
+      
+      await migration.up(mockQueryRunner);
+      
+      const table = await mockQueryRunner.getTable('users');
+      expect(table).toBeDefined();
+      
+      // 验证Notion字段
+      const notionAccessTokenColumn = table.columns.find(col => col.name === 'notionAccessToken');
+      expect(notionAccessTokenColumn?.isNullable).toBe(true);
+      expect(notionAccessTokenColumn?.type).toBe('varchar');
+      
+      const notionWorkspaceIdColumn = table.columns.find(col => col.name === 'notionWorkspaceId');
+      expect(notionWorkspaceIdColumn?.isNullable).toBe(true);
+      expect(notionWorkspaceIdColumn?.type).toBe('varchar');
+      
+      const notionWorkspaceNameColumn = table.columns.find(col => col.name === 'notionWorkspaceName');
+      expect(notionWorkspaceNameColumn?.isNullable).toBe(true);
+      expect(notionWorkspaceNameColumn?.type).toBe('varchar');
+      
+      const notionDatabaseIdColumn = table.columns.find(col => col.name === 'notionDatabaseId');
+      expect(notionDatabaseIdColumn?.isNullable).toBe(true);
+      expect(notionDatabaseIdColumn?.type).toBe('varchar');
+    });
+
+    it('应该成功回滚Notion字段', async () => {
+      const migration = new AddNotionFields1735230000000();
+      
+      // 先添加字段
+      await migration.up(mockQueryRunner);
+      
+      // 然后回滚
+      await migration.down(mockQueryRunner);
+      
+      const table = await mockQueryRunner.getTable('users');
+      expect(table).toBeDefined();
+      
+      // 验证字段被删除
+      const notionFields = ['notionAccessToken', 'notionWorkspaceId', 'notionWorkspaceName', 'notionDatabaseId'];
+      for (const fieldName of notionFields) {
+        const column = table.columns.find(col => col.name === fieldName);
+        expect(column).toBeUndefined();
+      }
+    });
+  });
+
+  describe('AddStripeFields Migration', () => {
+    beforeEach(async () => {
+      // 确保users表存在
+      const migration = new CreateUsersTable1700000000000();
+      await migration.up(mockQueryRunner);
+    });
+
+    it('应该成功添加Stripe字段', async () => {
+      const migration = new AddStripeFields1735235000000();
+      
+      await migration.up(mockQueryRunner);
+      
+      const table = await mockQueryRunner.getTable('users');
+      expect(table).toBeDefined();
+      
+      // 验证Stripe字段
+      const stripeCustomerIdColumn = table.columns.find(col => col.name === 'stripeCustomerId');
+      expect(stripeCustomerIdColumn?.isNullable).toBe(true);
+      expect(stripeCustomerIdColumn?.type).toBe('varchar');
+      
+      const stripeSubscriptionIdColumn = table.columns.find(col => col.name === 'stripeSubscriptionId');
+      expect(stripeSubscriptionIdColumn?.isNullable).toBe(true);
+      expect(stripeSubscriptionIdColumn?.type).toBe('varchar');
+    });
+
+    it('应该成功回滚Stripe字段', async () => {
+      const migration = new AddStripeFields1735235000000();
+      
+      // 先添加字段
+      await migration.up(mockQueryRunner);
+      
+      // 然后回滚
+      await migration.down(mockQueryRunner);
+      
+      const table = await mockQueryRunner.getTable('users');
+      expect(table).toBeDefined();
+      
+      // 验证字段被删除
+      const stripeCustomerIdColumn = table.columns.find(col => col.name === 'stripeCustomerId');
+      expect(stripeCustomerIdColumn).toBeUndefined();
+      
+      const stripeSubscriptionIdColumn = table.columns.find(col => col.name === 'stripeSubscriptionId');
+      expect(stripeSubscriptionIdColumn).toBeUndefined();
+    });
+  });
+
+  describe('Migration Sequence Integration', () => {
+    it('应该能够按顺序执行所有迁移', async () => {
+      // 按顺序执行所有迁移
+      const createUsersTable = new CreateUsersTable1700000000000();
+      await createUsersTable.up(mockQueryRunner);
+      
+      const addOAuthFields = new AddOAuthFields1700000000001();
+      await addOAuthFields.up(mockQueryRunner);
+      
+      const createConversationsTable = new CreateConversationsTable1735228030000();
+      await createConversationsTable.up(mockQueryRunner);
+      
+      const addNotionFields = new AddNotionFields1735230000000();
+      await addNotionFields.up(mockQueryRunner);
+      
+      const addStripeFields = new AddStripeFields1735235000000();
+      await addStripeFields.up(mockQueryRunner);
+      
+      // 验证最终表结构
+      const usersTable = await mockQueryRunner.getTable('users');
+      expect(usersTable).toBeDefined();
+      expect(usersTable.columns).toHaveLength(17); // 8个基础字段 + 3个OAuth字段 + 4个Notion字段 + 2个Stripe字段 (累加后为17)
+      
+      const conversationsTable = await mockQueryRunner.getTable('conversations');
+      expect(conversationsTable).toBeDefined();
+      expect(conversationsTable.columns).toHaveLength(11);
+      
+      // 验证相关方法被调用
+      expect(mockQueryRunner.createTable).toHaveBeenCalledTimes(2);
+      expect(mockQueryRunner.addColumns).toHaveBeenCalledTimes(3);
+      expect(mockQueryRunner.createForeignKey).toHaveBeenCalledTimes(1);
+    });
+
+    it('应该能够按逆序回滚所有迁移', async () => {
+      // 先执行所有迁移
+      const createUsersTable = new CreateUsersTable1700000000000();
+      await createUsersTable.up(mockQueryRunner);
+      
+      const addOAuthFields = new AddOAuthFields1700000000001();
+      await addOAuthFields.up(mockQueryRunner);
+      
+      const createConversationsTable = new CreateConversationsTable1735228030000();
+      await createConversationsTable.up(mockQueryRunner);
+      
+      const addNotionFields = new AddNotionFields1735230000000();
+      await addNotionFields.up(mockQueryRunner);
+      
+      const addStripeFields = new AddStripeFields1735235000000();
+      await addStripeFields.up(mockQueryRunner);
+      
+      // 按逆序回滚
+      await addStripeFields.down(mockQueryRunner);
+      await addNotionFields.down(mockQueryRunner);
+      await createConversationsTable.down(mockQueryRunner);
+      await addOAuthFields.down(mockQueryRunner);
+      await createUsersTable.down(mockQueryRunner);
+      
+      // 验证所有表都被删除
+      const hasUsersTable = await mockQueryRunner.hasTable('users');
+      expect(hasUsersTable).toBe(false);
+      
+      const hasConversationsTable = await mockQueryRunner.hasTable('conversations');
+      expect(hasConversationsTable).toBe(false);
+      
+      // 验证相关方法被调用
+      expect(mockQueryRunner.dropTable).toHaveBeenCalledTimes(2);
+      expect(mockQueryRunner.dropColumns).toHaveBeenCalledTimes(3);
+    });
+  });
+});

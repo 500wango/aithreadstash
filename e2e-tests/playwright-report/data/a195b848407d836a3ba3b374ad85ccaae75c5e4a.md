@@ -1,0 +1,53 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - link "AI ThreadStash" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - link "Create Account" [ref=e7] [cursor=pointer]:
+          - /url: /register
+    - main [ref=e8]:
+      - generic [ref=e10]:
+        - heading "Welcome Back" [level=1] [ref=e11]
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - generic [ref=e14]: Email Address
+            - textbox "Email Address" [ref=e15]
+          - generic [ref=e16]:
+            - generic [ref=e17]: Password
+            - textbox "Password" [ref=e18]
+          - generic [ref=e19]:
+            - generic [ref=e20]:
+              - checkbox "Remember me" [ref=e21]
+              - generic [ref=e22]: Remember me
+            - link "Forgot password?" [ref=e23] [cursor=pointer]:
+              - /url: /forgot-password
+          - button "Sign In" [ref=e24]
+        - generic [ref=e25]:
+          - generic [ref=e30]: Or continue with
+          - generic [ref=e31]:
+            - button [ref=e32]:
+              - img [ref=e33]
+            - button [ref=e38]:
+              - img [ref=e39]
+        - paragraph [ref=e41]:
+          - text: Don't have an account?
+          - link "Sign up" [ref=e42] [cursor=pointer]:
+            - /url: /register
+    - contentinfo [ref=e43]:
+      - generic [ref=e45]:
+        - generic [ref=e46]: AI ThreadStash
+        - generic [ref=e47]:
+          - link "Privacy" [ref=e48] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms" [ref=e49] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e50] [cursor=pointer]:
+            - /url: /contact
+  - button "Open Next.js Dev Tools" [ref=e56] [cursor=pointer]:
+    - img [ref=e57] [cursor=pointer]
+  - alert [ref=e60]
+```

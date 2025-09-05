@@ -20,7 +20,16 @@
       "Bash(echo:*)",
       "Bash(git add:*)",
       "Bash(git rm:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git push:*)",
+      "Bash(npm test:*)",
+      "Bash(npx jest:*)",
+      "Bash(npm run test:cov:*)",
+      "Bash(npm init:*)",
+      "Bash(PORT=3007 npm run start:dev)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

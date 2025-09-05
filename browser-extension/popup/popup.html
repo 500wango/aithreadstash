@@ -27,6 +27,14 @@
                     <span class="button-text" data-i18n="exportDeepSeek">导出 DeepSeek 对话</span>
                     <span class="button-icon">🧠</span>
                 </button>
+                <button id="exportClaude" class="export-button" data-platform="claude">
+                    <span class="button-text" data-i18n="exportClaude">导出 Claude 对话</span>
+                    <span class="button-icon">🎭</span>
+                </button>
+                <button id="exportGemini" class="export-button" data-platform="gemini">
+                    <span class="button-text" data-i18n="exportGemini">导出 Gemini 对话</span>
+                    <span class="button-icon">✨</span>
+                </button>
             </div>
             
             <div id="status" class="status-message" data-i18n="openSupportedPlatform">
@@ -35,6 +43,19 @@
         </div>
         
         <div class="footer">
+            <!-- 新增：与网站联动的快捷入口 -->
+            <button id="manageAccount" class="help-button">
+                <span class="button-icon">👤</span>
+                <span class="button-text">管理账户</span>
+            </button>
+            <button id="upgradePro" class="help-button">
+                <span class="button-icon">⚡</span>
+                <span class="button-text">升级到 Pro</span>
+            </button>
+            <button id="manageIntegrations" class="help-button">
+                <span class="button-icon">🧩</span>
+                <span class="button-text">集成设置</span>
+            </button>
             <button id="helpLink" class="help-button">
                 <span class="button-icon">❓</span>
                 <span class="button-text" data-i18n="help">帮助</span>
