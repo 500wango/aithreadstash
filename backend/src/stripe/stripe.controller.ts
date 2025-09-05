@@ -38,6 +38,13 @@ export class StripeController {
     return { url: sessionUrl };
   }
 
+  @Post('sync-subscription')
+  @UseGuards(JwtAuthGuard)
+  async syncSubscription(@GetUser() user: User) {
+    const updated = await this.stripeService.syncSubscriptionForUser(user.id);
+    return { user: updated };
+  }
+
   @Post('webhook')
   async handleWebhook(
     @Req() req: RawBodyRequest<Request>,

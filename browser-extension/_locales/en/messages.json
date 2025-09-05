@@ -1,0 +1,15 @@
+{
+  "extensionName": { "message": "AI ThreadStash Export Assistant" },
+  "extensionDescription": { "message": "One-click export of conversations from ChatGPT and other AI platforms, supporting local save and management." },
+  "exportButton": { "message": "Export Conversation" },
+  "exportSuccess": { "message": "Export successful!" },
+  "exportFail": { "message": "Export failed, please try again." },
+  "exportChatGPT": { "message": "Export ChatGPT Conversation" },
+  "exportDeepSeek": { "message": "Export DeepSeek Conversation" },
+  "exportClaude": { "message": "Export Claude Conversation" },
+  "exportGemini": { "message": "Export Gemini Conversation" },
+  "selectExportChatGPT": { "message": "Click to export ChatGPT conversation" },
+  "selectExportDeepSeek": { "message": "Click to export DeepSeek conversation" },
+  "selectExportClaude": { "message": "Click to export Claude conversation" },
+  "selectExportGemini": { "message": "Click to export Gemini conversation" }
+}

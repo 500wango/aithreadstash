@@ -19,6 +19,13 @@ export class User {
   })
   subscriptionStatus: 'free' | 'pro';
 
+  @Column({ 
+    type: 'enum', 
+    enum: ['user', 'admin'], 
+    default: 'user' 
+  })
+  role: 'user' | 'admin';
+
   @Column({ nullable: true })
   googleId: string;
 
@@ -46,11 +53,41 @@ export class User {
   @Column({ nullable: true })
   notionDatabaseId: string;
 
+  // === Google Drive integration fields ===
+  @Column({ nullable: true })
+  driveAccessToken: string; // AES encrypted
+
+  @Column({ nullable: true })
+  driveRefreshToken: string; // AES encrypted
+
+  @Column({ type: 'timestamptz', nullable: true })
+  driveTokenExpiry: Date | null; // access token expiry
+
+  @Column({ nullable: true })
+  driveFolderId: string;
+
+  @Column({ nullable: true })
+  driveFolderName: string;
+
   @Column({ nullable: true })
   stripeCustomerId: string;
 
   @Column({ nullable: true })
   stripeSubscriptionId: string;
+
+  // === Trial fields ===
+  @Column({ type: 'boolean', default: false })
+  onTrial: boolean;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  trialEndsAt: Date | null;
+
+  // === Password reset fields ===
+  @Column({ nullable: true })
+  resetPasswordTokenHash: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  resetPasswordExpiresAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;

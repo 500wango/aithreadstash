@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Preview Test Page</title>
+    <script src="i18n.js"></script>
+    <script src="showdown-simple.js"></script>
+    <script>
+        console.log('Test page script loading...');
+        console.log('Chrome available:', typeof chrome);
+        console.log('Chrome runtime:', typeof chrome?.runtime);
+        console.log('i18n available:', typeof i18n);
+        console.log('showdown available:', typeof showdown);
+        
+        // 测试消息发送
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            console.log('Testing message send...');
+            chrome.runtime.sendMessage({ action: 'test-message' }, (response) => {
+                console.log('Test message response:', response);
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Preview Test Page</h1>
+    <p>Check browser console for debug output.</p>
+</body>
+</html>

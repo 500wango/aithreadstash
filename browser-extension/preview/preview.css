@@ -214,10 +214,10 @@ body {
 /* --- Prism.js Code Block Styles --- */
 pre {
     margin: 1rem 0;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+    border-radius: 12px;
+    border: 1px solid #e1e5e9;
     font-family: 'Fira Code', Consolas, Monaco, monospace;
-    font-size: 14px;
+    font-size: 10px;
     white-space: pre-wrap; /* CSS 2.1 */
     white-space: -moz-pre-wrap; /* Mozilla */
     white-space: -pre-wrap; /* Opera 4-6 */
@@ -225,6 +225,73 @@ pre {
     word-wrap: break-word; /* IE */
     word-break: break-all;
     max-width: 100%;
+    max-height: 400px;
+    overflow: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+}
+
+/* Ensure code blocks never overlay other content (Gemini fix) */
+.message-content pre {
+    position: static !important;
+    z-index: auto !important;
+    display: block !important;
+    max-width: 100% !important;
+    width: 100%;
+    clear: both !important;
+    overflow: auto !important;
+}
+.message-content pre code {
+    position: static !important;
+    z-index: auto !important;
+    display: block;
+    max-width: 100%;
+}
+.message-content pre * {
+    position: static !important;
+    z-index: auto !important;
+}
+
+/* Inline code reset – prevent chips from overlaying text (Gemini inline) */
+.message-content code:not(pre code) {
+    position: static !important;
+    z-index: auto !important;
+    display: inline !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+    line-height: inherit !important;
+    vertical-align: baseline !important;
+}
+.message-content code:not(pre code) * {
+    position: static !important;
+    z-index: auto !important;
+    display: inline !important;
+}
+
+/* 自定义滚动条样式 */
+pre::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+pre::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+}
+
+pre::-webkit-scrollbar-corner {
+    background: rgba(0, 0, 0, 0.05);
 }
 
 pre[class*="language-"] {

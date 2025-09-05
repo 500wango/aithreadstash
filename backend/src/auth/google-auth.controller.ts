@@ -2,27 +2,31 @@ import { Controller, Get, Req, UseGuards, Res } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class GoogleAuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private configService: ConfigService) {}
 
-  @Get('google')
+  // Use distinct path to avoid collision with GoogleSimpleController in development
+  @Get('google-passport')
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
-    // 重定向到Google认证页面
+    // Redirect to Google authentication page via Passport strategy
   }
 
-  @Get('google/callback')
+  @Get('google-passport/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
     try {
       const result = await this.authService.findOrCreateGoogleUser(req.user);
       
-      // 重定向到前端页面，携带token
-      res.redirect(`http://localhost:3000/auth/success?token=${result.accessToken}`);
+      // Redirect to frontend with token
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      res.redirect(`${frontendUrl}/auth/success?token=${result.accessToken}`);
     } catch (error) {
-      res.redirect(`http://localhost:3000/auth/error?message=${encodeURIComponent(error.message)}`);
+      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+      res.redirect(`${frontendUrl}/auth/error?message=${encodeURIComponent(error.message)}`);
     }
   }
 }

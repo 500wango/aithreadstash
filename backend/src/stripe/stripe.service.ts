@@ -12,9 +12,7 @@ export class StripeService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2025-07-30.basil',
-    });
+    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
   }
 
   async createCheckoutSession(userId: number, priceId: string, successUrl: string, cancelUrl: string): Promise<string> {
@@ -24,21 +22,77 @@ export class StripeService {
       throw new BadRequestException('User not found');
     }
 
+    // 开发环境回退：当未配置 Stripe 密钥或使用占位 priceId 时，直接模拟成功并将用户升级为 Pro
+    const isDev = process.env.NODE_ENV !== 'production';
+    const isPlaceholderPrice = priceId === 'price_monthly_test_id' || priceId === 'price_yearly_test_id';
+    if (isDev && (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_DEV_FAKE === '1' || isPlaceholderPrice)) {
+      console.warn('[Stripe][DEV FAKE] Bypassing real checkout. Upgrading user locally.', {
+        userId,
+        priceId,
+        NODE_ENV: process.env.NODE_ENV,
+      });
+      await this.userRepository.update(userId, {
+        subscriptionStatus: 'pro',
+        stripeCustomerId: user.stripeCustomerId || `cus_dev_${userId}`,
+        stripeSubscriptionId: `sub_dev_${Date.now()}`,
+      });
+      return successUrl;
+    }
+
     let customerId = user.stripeCustomerId;
+    
+    // 如果已有 customerId，先用当前密钥检索；若检索失败（如资源在另一模式或不存在），则创建当前模式的新客户
+    if (customerId) {
+      try {
+        const existing = await this.stripe.customers.retrieve(customerId);
+        if (existing && typeof existing === 'object' && (existing as any).deleted) {
+          customerId = undefined as any;
+        }
+      } catch (e: any) {
+        console.warn('[Stripe] Existing customerId not accessible in current key/mode, will create new', {
+          customerId,
+          message: e?.message,
+          type: e?.type,
+          code: e?.code,
+          statusCode: e?.statusCode,
+          requestId: e?.requestId,
+        });
+        customerId = undefined as any;
+      }
+    }
     
     if (!customerId) {
       const customer = await this.stripe.customers.create({
         email: user.email,
-        metadata: {
-          userId: userId.toString(),
-        },
+        metadata: { userId: userId.toString() },
       });
-      
       customerId = customer.id;
       await this.userRepository.update(userId, { stripeCustomerId: customerId });
     }
 
     try {
+      // 预检 Price：有助于提前暴露「No such price / archived / mode mismatch」等问题
+      try {
+        const price = await this.stripe.prices.retrieve(priceId);
+        console.log('[Stripe] Price lookup', {
+          priceId,
+          active: price?.active,
+          currency: price?.currency,
+          nickname: (price as any)?.nickname,
+          product: typeof price.product === 'string' ? price.product : (price.product as any)?.id,
+          livemode: price?.livemode,
+        });
+      } catch (e: any) {
+        console.warn('[Stripe] Failed to retrieve price', {
+          priceId,
+          message: e?.message,
+          type: e?.type,
+          code: e?.code,
+          statusCode: e?.statusCode,
+          requestId: e?.requestId,
+        });
+      }
+
       const session = await this.stripe.checkout.sessions.create({
         customer: customerId,
         line_items: [
@@ -52,14 +106,24 @@ export class StripeService {
         cancel_url: cancelUrl,
         client_reference_id: userId.toString(),
         subscription_data: {
-          metadata: {
-            userId: userId.toString(),
-          },
+          metadata: { userId: userId.toString() },
         },
+        allow_promotion_codes: true,
       });
 
       return session.url;
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Stripe checkout session error', {
+        message: error?.message,
+        type: error?.type,
+        code: error?.code,
+        statusCode: error?.statusCode,
+        param: error?.param,
+        rawType: error?.rawType,
+        rawMessage: error?.raw?.message,
+        requestId: error?.requestId,
+        docs: error?.docs_url,
+      });
       throw new InternalServerErrorException('Failed to create checkout session');
     }
   }
@@ -68,6 +132,12 @@ export class StripeService {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     
     if (!user || !user.stripeCustomerId) {
+      // 开发环境回退：允许直接回跳
+      const isDev = process.env.NODE_ENV !== 'production';
+      if (isDev && !process.env.STRIPE_SECRET_KEY) {
+        console.warn('[Stripe][DEV FAKE] No stripeCustomerId. Returning returnUrl in dev.', { userId });
+        return returnUrl;
+      }
       throw new BadRequestException('No active subscription found');
     }
 
@@ -79,8 +149,81 @@ export class StripeService {
 
       return session.url;
     } catch (error) {
-      console.error('Stripe portal session error:', error);
-      throw new InternalServerErrorException('Failed to create portal session');
+      // 开发环境回退：避免卡死在门户
+      const isDev = process.env.NODE_ENV !== 'production';
+      if (isDev && !process.env.STRIPE_SECRET_KEY) {
+        console.warn('[Stripe][DEV FAKE] Failed to create portal session, returning returnUrl in dev.', { userId });
+        return returnUrl;
+      }
+      throw new InternalServerErrorException('Failed to create customer portal session');
+    }
+  }
+
+  // 新增：根据 Stripe 实时数据同步用户订阅状态（用于 webhook 兜底/手动刷新）
+  async syncSubscriptionForUser(userId: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    // 若没有绑定 Stripe 客户，直接视为 free（开发环境假订阅除外）
+    if (!user.stripeCustomerId) {
+      const isDev = process.env.NODE_ENV !== 'production';
+      if (isDev && !process.env.STRIPE_SECRET_KEY && user.subscriptionStatus === 'pro') {
+        // 在开发假订阅场景下，保持 Pro 状态
+        return user;
+      }
+      if (user.subscriptionStatus !== 'free') {
+        await this.userRepository.update(userId, { subscriptionStatus: 'free' });
+        user.subscriptionStatus = 'free';
+      }
+      return user;
+    }
+
+    try {
+      // 优先查找活跃订阅
+      const activeSubs = await this.stripe.subscriptions.list({
+        customer: user.stripeCustomerId,
+        status: 'active',
+        limit: 1,
+      });
+
+      if (activeSubs.data.length > 0) {
+        const sub = activeSubs.data[0];
+        await this.userRepository.update(userId, {
+          subscriptionStatus: 'pro',
+          stripeSubscriptionId: sub.id,
+        });
+        return { ...user, subscriptionStatus: 'pro', stripeSubscriptionId: sub.id } as User;
+      }
+
+      // 未找到 active，则取最近一条订阅记录做兜底判断
+      const anySubs = await this.stripe.subscriptions.list({
+        customer: user.stripeCustomerId,
+        status: 'all',
+        limit: 1,
+      });
+
+      if (anySubs.data.length > 0) {
+        const sub = anySubs.data[0];
+        if (sub.status === 'active') {
+          await this.userRepository.update(userId, {
+            subscriptionStatus: 'pro',
+            stripeSubscriptionId: sub.id,
+          });
+          return { ...user, subscriptionStatus: 'pro', stripeSubscriptionId: sub.id } as User;
+        }
+      }
+
+      // 其余情况均降级为 free
+      if (user.subscriptionStatus !== 'free') {
+        await this.userRepository.update(userId, { subscriptionStatus: 'free' });
+      }
+      return { ...user, subscriptionStatus: 'free' } as User;
+    } catch (error) {
+      console.error('[Stripe] syncSubscriptionForUser failed', error);
+      // 出错时不改变现有状态，返回当前用户数据
+      return user;
     }
   }
 
@@ -127,55 +270,59 @@ export class StripeService {
     }
 
     try {
-      await this.userRepository.update(parseInt(userId), {
-        stripeCustomerId: customerId,
-        stripeSubscriptionId: subscriptionId,
-        subscriptionStatus: 'pro',
-      });
+      // 获取订阅详情以确认状态
+      const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
+      
+      if (subscription.status === 'active') {
+        await this.userRepository.update(parseInt(userId), {
+          stripeCustomerId: customerId,
+          stripeSubscriptionId: subscriptionId,
+          subscriptionStatus: 'pro',
+          onTrial: false,
+          trialEndsAt: null,
+        });
+        console.log(`User ${userId} subscription activated successfully`);
+      } else {
+        console.warn(`Subscription ${subscriptionId} is not active: ${subscription.status}`);
+      }
     } catch (error) {
-      console.error('Failed to update user subscription:', error);
+      console.error('Error handling checkout.session.completed event:', error);
     }
   }
 
   private async handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-    const userId = subscription.metadata.userId;
-    
-    if (!userId) {
-      console.error('No user ID found in subscription metadata');
-      return;
-    }
-
     try {
-      if (subscription.status === 'active') {
+      const customer = await this.stripe.customers.retrieve(subscription.customer as string);
+      const customerObj = customer as Stripe.Customer;
+      const userId = customerObj.metadata?.userId;
+      if (userId) {
+        const active = subscription.status === 'active';
         await this.userRepository.update(parseInt(userId), {
-          subscriptionStatus: 'pro',
+          subscriptionStatus: active ? 'pro' : 'free',
           stripeSubscriptionId: subscription.id,
-        });
-      } else if (subscription.status === 'past_due' || subscription.status === 'unpaid') {
-        await this.userRepository.update(parseInt(userId), {
-          subscriptionStatus: 'free',
+          ...(active ? { onTrial: false, trialEndsAt: null } : {}),
         });
       }
     } catch (error) {
-      console.error('Failed to update subscription status:', error);
+      console.error('Error handling customer.subscription.updated event:', error);
     }
   }
 
   private async handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-    const userId = subscription.metadata.userId;
-    
-    if (!userId) {
-      console.error('No user ID found in subscription metadata');
-      return;
-    }
-
     try {
-      await this.userRepository.update(parseInt(userId), {
-        subscriptionStatus: 'free',
-        stripeSubscriptionId: null,
-      });
+      const customer = await this.stripe.customers.retrieve(subscription.customer as string);
+      const customerObj = customer as Stripe.Customer;
+      const userId = customerObj.metadata?.userId;
+      if (userId) {
+        await this.userRepository.update(parseInt(userId), {
+          subscriptionStatus: 'free',
+          stripeSubscriptionId: null,
+          onTrial: false,
+          trialEndsAt: null,
+        });
+      }
     } catch (error) {
-      console.error('Failed to handle subscription deletion:', error);
+      console.error('Error handling customer.subscription.deleted event:', error);
     }
   }
 }
