@@ -57,6 +57,6 @@ services:
 databases:
   # PostgreSQL database
   - name: aithreadstash-db
-    plan: starter
+    plan: free
     databaseName: aithreadstash_prod
     user: aithreadstash_user

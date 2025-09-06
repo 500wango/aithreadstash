@@ -59,6 +59,6 @@ services:
 databases:
   # PostgreSQL database (staging)
   - name: aithreadstash-db-staging
-    plan: starter
+    plan: free
     databaseName: aithreadstash_staging
     user: aithreadstash_user_staging
