@@ -36,7 +36,7 @@ export default function Settings() {
       setUser(userData);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to load user data");
-      const status = (err as any)?.status;
+      const status = (err as { status?: number })?.status;
       if (status === 401) {
         window.location.href = "/login";
       }

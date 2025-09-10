@@ -61,7 +61,7 @@ export default function Dashboard() {
         const message = err instanceof Error ? err.message : typeof err === 'string' ? err : "Failed to load user data";
         setError(message);
         // Only redirect to login for unauthorized; do not clear tokens here
-        const status = (err as any)?.status;
+        const status = (err as { status?: number })?.status;
         if (status === 401) {
           window.location.href = "/login";
         }

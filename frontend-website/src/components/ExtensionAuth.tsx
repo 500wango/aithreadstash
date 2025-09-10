@@ -22,7 +22,9 @@ export default function ExtensionAuth() {
   useEffect(() => {
     // Only run in browser extension environment
     // More strict check: ensure we're in a proper extension context
-    const isExtensionEnvironment = window.chrome?.runtime?.id && 
+    const isExtensionEnvironment = window.chrome?.runtime && 
+                                 typeof window.chrome.runtime === 'object' &&
+                                 'id' in window.chrome.runtime &&
                                  window.chrome.runtime.sendMessage &&
                                  typeof window.chrome.runtime.sendMessage === 'function';
     

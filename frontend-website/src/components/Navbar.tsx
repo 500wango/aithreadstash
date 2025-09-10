@@ -14,7 +14,7 @@ export default function Navbar() {
       try {
         const authStatus = await ApiService.isAuthenticated();
         setIsAuthenticated(authStatus);
-      } catch (error) {
+      } catch {
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);

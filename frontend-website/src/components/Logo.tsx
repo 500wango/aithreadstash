@@ -10,7 +10,6 @@ interface LogoProps {
 
 export function Logo({ height = 32, className = "" }: LogoProps) {
   // 直接使用文字占位符，不再使用图片
-  const isAuthenticated = ApiService.isAuthenticated();
   
   return (
     <Link

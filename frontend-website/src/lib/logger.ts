@@ -66,7 +66,7 @@ function baseLog(level: LogLevel, args: unknown[]) {
 
   if (isDev) {
     // In dev, mirror to console for best DX
-    const c: any = console;
+    const c: { [key: string]: (...args: unknown[]) => void } = console;
     const fn = typeof c[level] === "function" ? c[level] : c.log;
     try {
       fn(`[${level.toUpperCase()}]`, ...args, `#${id}`);
