@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>对比测试Claude和DeepSeek内容脚本</title>
+</head>
+<body>
+    <h1>对比测试Claude和DeepSeek内容脚本</h1>
+    <p>这个页面用于对比Claude和DeepSeek内容脚本的行为差异。</p>
+    
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+            <h2>Claude测试</h2>
+            <button id="test-claude">测试Claude内容脚本</button>
+            <div id="claude-output" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; margin-top: 10px;"></div>
+        </div>
+        
+        <div style="flex: 1;">
+            <h2>DeepSeek测试</h2>
+            <button id="test-deepseek">测试DeepSeek内容脚本</button>
+            <div id="deepseek-output" style="white-space: pre-wrap; border: 1px solid #ccc; padding: 10px; margin-top: 10px;"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 日志收集器
+        function createLogCollector(outputElement) {
+            const originalConsoleLog = console.log;
+            const originalConsoleError = console.error;
+            
+            return function(message, ...optionalParams) {
+                const timestamp = new Date().toISOString().substr(11, 12);
+                const logEntry = `[${timestamp}] ${message}
+`;
+                outputElement.textContent += logEntry;
+                outputElement.scrollTop = outputElement.scrollHeight;
+                
+                // 同时输出到控制台
+                originalConsoleLog.call(console, `[TEST] ${message}`, ...optionalParams);
+            };
+        }
+        
+        // 模拟Chrome扩展API
+        function createMockChromeAPI(log) {
+            return {
+                runtime: {
+                    onMessage: {
+                        listeners: [],
+                        addListener: function(callback) {
+                            log('Chrome runtime onMessage listener added');
+                            this.listeners.push(callback);
+                        },
+                        sendMessage: function(message, callback) {
+                            log('Chrome runtime sendMessage called with:', JSON.stringify(message));
+                            // 调用所有监听器
+                            this.listeners.forEach(listener => {
+                                try {
+                                    listener(message, null, callback || function() {});
+                                } catch (error) {
+                                    log('Error in listener:', error.message);
+                                }
+                            });
+                        }
+                    },
+                    lastError: null,
+                    sendMessage: function(message, callback) {
+                        log('Runtime sendMessage:', JSON.stringify(message));
+                        if (callback) callback({success: true});
+                    }
+                },
+                tabs: {
+                    sendMessage: function(tabId, message, callback) {
+                        log('Tabs sendMessage:', JSON.stringify(message));
+                        if (callback) callback({success: true});
+                    }
+                }
+            };
+        }
+        
+        // 模拟Node对象
+        function createMockNode() {
+            return {
+                DOCUMENT_POSITION_FOLLOWING: 4
+            };
+        }
+        
+        // 模拟document.readyState
+        function mockDocumentReadyState() {
+            Object.defineProperty(document, 'readyState', {
+                value: 'complete',
+                writable: false
+            });
+        }
+        
+        // 测试Claude内容脚本
+        document.getElementById('test-claude').onclick = async function() {
+            const output = document.getElementById('claude-output');
+            output.textContent = '';
+            const log = createLogCollector(output);
+            
+            try {
+                log('=== 开始测试Claude内容脚本 ===');
+                
+                // 设置模拟环境
+                window.chrome = createMockChromeAPI(log);
+                window.Node = createMockNode();
+                mockDocumentReadyState();
+                
+                // 加载Claude内容脚本
+                const response = await fetch('browser-extension/content_scripts/claude.js');
+                const scriptContent = await response.text();
+                
+                log('Claude内容脚本加载成功，长度: ' + scriptContent.length + ' 字符');
+                
+                // 执行脚本
+                const scriptFunction = new Function(scriptContent);
+                scriptFunction();
+                
+                log('Claude内容脚本执行完成');
+                
+                // 等待一会儿看是否有自动执行
+                setTimeout(() => {
+                    log('等待5秒检查是否有自动执行...');
+                }, 5000);
+                
+            } catch (error) {
+                log('测试Claude内容脚本时出错: ' + error.message);
+            }
+        };
+        
+        // 测试DeepSeek内容脚本
+        document.getElementById('test-deepseek').onclick = async function() {
+            const output = document.getElementById('deepseek-output');
+            output.textContent = '';
+            const log = createLogCollector(output);
+            
+            try {
+                log('=== 开始测试DeepSeek内容脚本 ===');
+                
+                // 设置模拟环境
+                window.chrome = createMockChromeAPI(log);
+                window.Node = createMockNode();
+                mockDocumentReadyState();
+                
+                // 加载DeepSeek内容脚本
+                const response = await fetch('browser-extension/content_scripts/deepseek.js');
+                const scriptContent = await response.text();
+                
+                log('DeepSeek内容脚本加载成功，长度: ' + scriptContent.length + ' 字符');
+                
+                // 执行脚本
+                const scriptFunction = new Function(scriptContent);
+                scriptFunction();
+                
+                log('DeepSeek内容脚本执行完成');
+                
+                // 等待一会儿看是否有自动执行
+                setTimeout(() => {
+                    log('等待5秒检查是否有自动执行...');
+                }, 5000);
+                
+            } catch (error) {
+                log('测试DeepSeek内容脚本时出错: ' + error.message);
+            }
+        };
+    </script>
+</body>
+</html>

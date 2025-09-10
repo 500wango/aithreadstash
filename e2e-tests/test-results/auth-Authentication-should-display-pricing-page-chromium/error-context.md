@@ -1,0 +1,97 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - link "AI ThreadStash" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - link "Login" [ref=e7] [cursor=pointer]:
+            - /url: /login
+          - link "Get Started" [ref=e8] [cursor=pointer]:
+            - /url: /register
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Simple, Transparent Pricing" [level=1] [ref=e11]
+        - paragraph [ref=e12]: Choose the plan that works best for your needs. All plans include our core features.
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - heading "Free" [level=2] [ref=e16]
+            - generic [ref=e17]: $0
+            - generic [ref=e18]: forever
+          - list [ref=e19]:
+            - listitem [ref=e20]:
+              - img [ref=e21]
+              - text: Basic conversation capture
+            - listitem [ref=e23]:
+              - img [ref=e24]
+              - text: Local storage only
+            - listitem [ref=e26]:
+              - img [ref=e27]
+              - text: Basic formatting options
+            - listitem [ref=e29]:
+              - img [ref=e30]
+              - text: Community support
+          - button "Get Started Free" [ref=e32]
+        - generic [ref=e33]:
+          - generic [ref=e34]: Popular
+          - generic [ref=e35]:
+            - heading "Pro" [level=2] [ref=e36]
+            - generic [ref=e37]:
+              - generic [ref=e38]: $5
+              - generic [ref=e39]: /month
+            - generic [ref=e40]: Save 20% with annual billing ($48/year)
+          - list [ref=e41]:
+            - listitem [ref=e42]:
+              - img [ref=e43]
+              - text: "Everything in Free, plus:"
+            - listitem [ref=e45]:
+              - img [ref=e46]
+              - text: Notion integration
+            - listitem [ref=e48]:
+              - img [ref=e49]
+              - text: Cloud sync & backup
+            - listitem [ref=e51]:
+              - img [ref=e52]
+              - text: Advanced formatting options
+            - listitem [ref=e54]:
+              - img [ref=e55]
+              - text: Priority support
+            - listitem [ref=e57]:
+              - img [ref=e58]
+              - text: Export to multiple formats
+          - generic [ref=e60]:
+            - button "Start Free Trial - Monthly" [ref=e61]
+            - button "Start Free Trial - Yearly" [ref=e62]
+      - generic [ref=e63]:
+        - heading "Frequently Asked Questions" [level=2] [ref=e64]
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - heading "Can I switch plans anytime?" [level=3] [ref=e67]
+            - paragraph [ref=e68]: Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.
+          - generic [ref=e69]:
+            - heading "Is there a free trial?" [level=3] [ref=e70]
+            - paragraph [ref=e71]: Yes! Pro plans include a 14-day free trial with full access to all features.
+          - generic [ref=e72]:
+            - heading "What payment methods do you accept?" [level=3] [ref=e73]
+            - paragraph [ref=e74]: We accept all major credit cards through our secure Stripe payment processing.
+          - generic [ref=e75]:
+            - heading "Can I cancel anytime?" [level=3] [ref=e76]
+            - paragraph [ref=e77]: Absolutely. You can cancel your subscription at any time with no cancellation fees.
+    - contentinfo [ref=e78]:
+      - generic [ref=e80]:
+        - generic [ref=e81]: AI ThreadStash
+        - generic [ref=e82]:
+          - link "Privacy" [ref=e83] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms" [ref=e84] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e85] [cursor=pointer]:
+            - /url: /contact
+  - button "Open Next.js Dev Tools" [ref=e91] [cursor=pointer]:
+    - img [ref=e92] [cursor=pointer]
+  - alert [ref=e95]
+```

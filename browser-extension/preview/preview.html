@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>AI ThreadStash - Conversation Preview</title>
+    
+    <!-- Local Stylesheet -->
+    <link rel="stylesheet" href="preview.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+    /* Block code (pre) */
+    pre {
+        background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%) !important;
+        border: 1px solid #e1e5e9 !important;
+        border-radius: 12px !important;
+        padding: 12px !important;
+        font-family: 'Fira Code', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+        font-size: 10px !important;
+        line-height: 1.5 !important;
+        white-space: pre-wrap !important;
+        word-wrap: break-word !important;
+        overflow: auto !important;
+        max-height: 400px !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        margin: 8px 0 !important;
+    }
+
+    /* Inline code (non-block) */
+    code:not(pre code) {
+        background: #f5f5f5 !important;
+        border: 1px solid #e1e5e9 !important;
+        border-radius: 4px !important;
+        padding: 0.1em 0.25em !important;
+        font-family: 'Fira Code', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace !important;
+        font-size: 0.95em !important;
+        line-height: 1.25 !important;
+        position: static !important;
+        z-index: auto !important;
+        display: inline !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow: visible !important;
+        max-height: none !important;
+        vertical-align: baseline !important;
+    }
+    
+    /* 自定义滚动条样式 (仅用于块级代码) */
+    pre::-webkit-scrollbar {
+        width: 8px !important;
+        height: 8px !important;
+    }
+    
+    pre::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05) !important;
+        border-radius: 4px !important;
+    }
+    
+    pre::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%) !important;
+        border-radius: 4px !important;
+        transition: background 0.3s ease !important;
+    }
+    
+    pre::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #a0aec0 0%, #718096 100%) !important;
+    }
+    
+    pre::-webkit-scrollbar-corner {
+        background: rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    code {
+        margin: 2px !important;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <img src="../assets/logo.png" alt="AI ThreadStash" class="full-logo">
+            </div>
+            <div class="toolbar-right">
+                <button id="downloadMd" class="toolbar-btn">
+                    <span class="btn-icon">📄</span>
+                    <span class="btn-text" data-i18n="downloadMd">下载 Markdown</span>
+                </button>
+                <button id="downloadJson" class="toolbar-btn">
+                    <span class="btn-icon">📋</span>
+                    <span class="btn-text" data-i18n="downloadJson">下载 JSON</span>
+                </button>
+                <button id="copyRichText" class="toolbar-btn">
+                    <span class="btn-icon">📝</span>
+                    <span class="btn-text" data-i18n="copyRichText">复制为富文本</span>
+                </button>
+                <button id="printContent" class="toolbar-btn">
+                    <span class="btn-icon">📄</span>
+                    <span class="btn-text" data-i18n="print">Print to PDF</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="header">
+            <div class="conversation-info">
+                <h2 id="conversationTitle" data-i18n="loading">加载中...</h2>
+                <div class="metadata">
+                    <span id="exportTime"></span>
+                    <span>•</span>
+                    <a id="sourceLink" href="#" target="_blank" data-i18n="source">查看原始对话</a>
+                </div>
+            </div>
+        </div>
+        
+        <div id="conversationContent" class="conversation-content">
+            <div class="loading" data-i18n="loadingConversation">正在加载对话内容...</div>
+        </div>
+        
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+    
+    <!-- External Scripts -->
+    <script src="i18n.js"></script>
+    <script src="showdown-simple.js"></script>
+    <script src="preview.js"></script>
+</body>
+</html>

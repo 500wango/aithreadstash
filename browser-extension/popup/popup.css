@@ -1,0 +1,146 @@
+.container {
+    width: 200px;
+    padding: 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.header h1 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.main-content {
+    margin-bottom: 16px;
+}
+
+.export-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.export-button {
+    width: 100%;
+    padding: 10px 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.export-button:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+.export-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.export-button[data-platform="chatgpt"] {
+    background: #10a37f;
+}
+
+.export-button[data-platform="chatgpt"]:hover {
+    background: #0d8c6d;
+}
+
+.export-button[data-platform="deepseek"] {
+    background: #6366f1;
+}
+
+.export-button[data-platform="deepseek"]:hover {
+    background: #4f46e5;
+}
+
+.status-message {
+    margin-top: 12px;
+    padding: 8px;
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    border-radius: 4px;
+    background: #f8f9fa;
+}
+
+.status-message.loading {
+    color: #007bff;
+    background: #e3f2fd;
+}
+
+.status-message.error {
+    color: #dc3545;
+    background: #f8d7da;
+}
+
+.platform-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 8px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.platform-icon {
+    font-size: 14px;
+}
+
+.platform-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.help-button {
+    width: 100%;
+    padding: 10px 12px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s;
+    margin-bottom: 8px;
+}
+
+.help-button:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.version {
+    font-size: 11px;
+    color: #999;
+    margin: 0;
+    font-weight: 400;
+}

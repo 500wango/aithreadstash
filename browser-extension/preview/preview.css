@@ -1,0 +1,484 @@
+/* General Body Styles */
+body {
+    background-color: #f7f7f8;
+    color: #1a1a1a;
+    font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 850px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Main Toolbar */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eaeaed;
+}
+
+.toolbar-left .full-logo {
+    height: 120px;
+    width: auto;
+    max-width: 600px;
+}
+
+.toolbar-right {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.toolbar-btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    min-width: 110px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.toolbar-btn:hover::before {
+    left: 100%;
+}
+
+/* Download Markdown Button - Blue Theme */
+#downloadMd {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+#downloadMd:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#downloadMd:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 3px rgba(102, 126, 234, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Download JSON Button - Green Theme */
+#downloadJson {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+}
+
+#downloadJson:hover {
+    background: linear-gradient(135deg, #0f877d 0%, #32d96b 100%);
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(17, 153, 142, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#downloadJson:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 3px rgba(17, 153, 142, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Copy Rich Text Button - Orange Theme */
+#copyRichText {
+    background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+    color: #333;
+}
+
+#copyRichText:hover {
+    background: linear-gradient(135deg, #ff8a8e 0%, #febcdf 100%);
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(255, 154, 158, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#copyRichText:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 3px rgba(255, 154, 158, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Print to PDF Button - Purple Theme */
+#printContent {
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #333;
+}
+
+#printContent:hover {
+    background: linear-gradient(135deg, #98ddd8 0%, #fdc4d3 100%);
+    transform: translateY(1px);
+    box-shadow: 0 2px 6px rgba(168, 237, 234, 0.4), 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#printContent:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 3px rgba(168, 237, 234, 0.3), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toolbar-btn .btn-icon {
+    font-size: 1rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.toolbar-btn .btn-text {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+/* Header Info */
+.header {
+    margin-bottom: 2rem;
+}
+.conversation-info h2 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+}
+.metadata {
+    color: #6b6b70;
+    font-size: 0.85rem;
+}
+.metadata a {
+    color: #007aff;
+}
+
+/* Conversation Content */
+.message, .conversation-export .message {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    border-radius: 10px;
+}
+.message.user {
+    background-color: #f0f4f8;
+}
+.message.assistant {
+    background-color: #f1f8e9;
+}
+.message-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+.role-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-right: 0.75rem;
+    color: white;
+}
+.user .role-badge {
+    background: #007aff;
+}
+.assistant .role-badge {
+    background: #4caf50;
+}
+.message-content p:first-child {
+    margin-top: 0;
+}
+.message-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* --- Prism.js Code Block Styles --- */
+pre {
+    margin: 1rem 0;
+    border-radius: 12px;
+    border: 1px solid #e1e5e9;
+    font-family: 'Fira Code', Consolas, Monaco, monospace;
+    font-size: 10px;
+    white-space: pre-wrap; /* CSS 2.1 */
+    white-space: -moz-pre-wrap; /* Mozilla */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word; /* IE */
+    word-break: break-all;
+    max-width: 100%;
+    max-height: 400px;
+    overflow: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f4 100%);
+}
+
+/* Ensure code blocks never overlay other content (Gemini fix) */
+.message-content pre {
+    position: static !important;
+    z-index: auto !important;
+    display: block !important;
+    max-width: 100% !important;
+    width: 100%;
+    clear: both !important;
+    overflow: auto !important;
+}
+.message-content pre code {
+    position: static !important;
+    z-index: auto !important;
+    display: block;
+    max-width: 100%;
+}
+.message-content pre * {
+    position: static !important;
+    z-index: auto !important;
+}
+
+/* Inline code reset – prevent chips from overlaying text (Gemini inline) */
+.message-content code:not(pre code) {
+    position: static !important;
+    z-index: auto !important;
+    display: inline !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    max-width: 100% !important;
+    line-height: inherit !important;
+    vertical-align: baseline !important;
+}
+.message-content code:not(pre code) * {
+    position: static !important;
+    z-index: auto !important;
+    display: inline !important;
+}
+
+/* 自定义滚动条样式 */
+pre::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+pre::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+pre::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #cbd5e0 0%, #a0aec0 100%);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+pre::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+}
+
+pre::-webkit-scrollbar-corner {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+pre[class*="language-"] {
+    background: #000000 !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    word-break: break-all !important;
+    overflow-wrap: break-word !important;
+    padding: 1em;
+    overflow: auto;
+    border-radius: 0.3em;
+}
+
+code[class*="language-"] {
+    background: transparent !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    word-break: break-all !important;
+    overflow-wrap: break-word !important;
+    display: block;
+}
+
+pre code .token {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    display: inline-block;
+    max-width: 100%;
+}
+
+code {
+    white-space: pre-wrap; /* CSS 2.1 */
+    white-space: -moz-pre-wrap; /* Mozilla */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word; /* IE */
+    word-break: break-all;
+}
+
+/* Status Message */
+.status-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 24px;
+    border-radius: 6px;
+    background-color: #4caf50;
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    max-width: 90%;
+    text-align: center;
+    word-break: break-word;
+}
+
+.status-message.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.status-message.error {
+    background-color: #f44336;
+    font-weight: 600;
+}
+
+.error {
+    padding: 20px;
+    margin: 20px;
+    border-radius: 8px;
+    background-color: #fff3f3;
+    color: #d32f2f;
+    border: 1px solid #ffa4a4;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    line-height: 1.6;
+    text-align: center;
+}
+
+.error strong {
+    display: block;
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #b71c1c;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin: 20px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* Print Styles */
+@media print {
+    @page {
+        margin: 1cm;
+        size: auto;
+    }
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .container {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+    .toolbar, div.code-toolbar > .toolbar, .status-message {
+        display: none !important;
+    }
+    .header {
+        display: block !important;
+        margin-bottom: 1.5rem !important;
+        padding-bottom: 1rem !important;
+        border-bottom: 1px solid #ddd !important;
+    }
+    .header .metadata {
+        display: none !important;
+    }
+    .header #conversationTitle {
+        font-size: 1.5rem !important;
+        font-weight: bold !important;
+        margin: 0 !important;
+        color: #000 !important;
+    }
+    .toolbar-left .full-logo {
+        height: 32px !important;
+        width: auto !important;
+        max-width: 180px !important;
+        display: inline-block !important;
+    }
+    .message {
+        border: 1px solid #eee;
+        page-break-inside: auto;
+        background-color: transparent !important;
+    }
+    pre[class*="language-"] {
+        page-break-inside: avoid;
+        white-space: pre-wrap !important;
+        background: none !important;
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+        margin: 0.5em 0 !important;
+    }
+    code[class*="language-"] {
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        font-family: 'Fira Code', Consolas, Monaco, monospace !important;
+    }
+    div.code-toolbar {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    a[href]:after {
+        content: none !important;
+    }
+    img {
+        max-width: 100% !important;
+        page-break-inside: avoid;
+    }
+    p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+    }
+    h2, h3 {
+        page-break-after: avoid;
+    }
+}

@@ -1,0 +1,15 @@
+{
+  "extensionName": { "message": "AI ThreadStash 会话导出助手" },
+  "extensionDescription": { "message": "一键导出ChatGPT等AI平台对话，支持本地保存与管理。" },
+  "exportButton": { "message": "导出会话" },
+  "exportSuccess": { "message": "导出成功！" },
+  "exportFail": { "message": "导出失败，请重试。" },
+  "exportChatGPT": { "message": "导出 ChatGPT 对话" },
+  "exportDeepSeek": { "message": "导出 DeepSeek 对话" },
+  "exportClaude": { "message": "导出 Claude 对话" },
+  "exportGemini": { "message": "导出 Gemini 对话" },
+  "selectExportChatGPT": { "message": "点击导出 ChatGPT 对话" },
+  "selectExportDeepSeek": { "message": "点击导出 DeepSeek 对话" },
+  "selectExportClaude": { "message": "点击导出 Claude 对话" },
+  "selectExportGemini": { "message": "点击导出 Gemini 对话" }
+}

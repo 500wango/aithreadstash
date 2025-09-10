@@ -1,0 +1,1 @@
+console.log('[Minimal Test Extension] Content script loaded on claude.ai');

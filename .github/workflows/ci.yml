@@ -1,0 +1,278 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Install backend dependencies
+      run: |
+        cd backend
+        npm ci
+    
+    - name: Run backend tests
+      run: |
+        cd backend
+        npm test
+      env:
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_USERNAME: postgres
+        DB_PASSWORD: postgres
+        DB_NAME: test_db
+        JWT_SECRET: test_jwt_secret_for_ci
+        ENCRYPTION_KEY: test_encryption_key_for_ci
+
+    - name: Upload backend test coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./backend/coverage/lcov.info
+        flags: backend
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend-website/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend-website
+        npm ci
+    
+    - name: Run frontend tests
+      run: |
+        cd frontend-website
+        npm test -- --coverage --watchAll=false
+      env:
+        NEXT_PUBLIC_API_URL: http://localhost:3002
+
+    - name: Upload frontend test coverage
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./frontend-website/coverage/lcov.info
+        flags: frontend
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend-website/package-lock.json
+    
+    - name: Install frontend dependencies
+      run: |
+        cd frontend-website
+        npm ci
+    
+    - name: Run ESLint
+      run: |
+        cd frontend-website
+        npm run lint
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test-backend, test-frontend, lint]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+    
+    - name: Build backend
+      run: |
+        cd backend
+        npm run build
+    
+    - name: Setup Node.js for frontend
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend-website/package-lock.json
+    
+    - name: Build frontend
+      run: |
+        cd frontend-website
+        npm run build
+
+  smoke-backend:
+    runs-on: ubuntu-latest
+    needs: [test-backend]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Run DB migrations
+        run: |
+          cd backend
+          npm run migration:run
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: test_db
+
+      - name: Build backend
+        run: |
+          cd backend
+          npm run build
+
+      - name: Start backend server
+        run: |
+          cd backend
+          nohup env PORT=3007 \
+            DB_HOST=localhost DB_PORT=5432 DB_USERNAME=postgres DB_PASSWORD=postgres DB_NAME=test_db \
+            JWT_SECRET=test_jwt_secret_for_ci ENCRYPTION_KEY=test_encryption_key_for_ci \
+            node dist/src/main > server.log 2>&1 & echo $! > server.pid
+          sleep 2
+
+      - name: Wait for liveness and readiness
+        run: |
+          for i in {1..60}; do
+            if curl -sf http://localhost:3007/health/live >/dev/null && curl -sf http://localhost:3007/health/ready >/dev/null; then
+              echo "Backend is live and ready"; exit 0;
+            fi
+            echo "Waiting for backend..."; sleep 2;
+          done
+          echo "Backend did not become live/ready in time"; echo "===== server.log ====="; cat backend/server.log || true; exit 1
+
+      - name: Run acceptance smoke script
+        run: |
+          pwsh -NoProfile -ExecutionPolicy Bypass -File backend/scripts/acceptance_smoke.ps1
+
+      - name: Show server log (on failure)
+        if: failure()
+        run: |
+          echo "===== server.log (tail) ====="
+          tail -n 200 backend/server.log || true
+
+      - name: Stop backend server
+        if: always()
+        run: |
+          if [ -f backend/server.pid ]; then
+            kill $(cat backend/server.pid) || true
+          fi
+
+  release-backend:
+    runs-on: ubuntu-latest
+    needs: [build, smoke-backend]
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: prod_like_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Run deploy script (migrations + health gates)
+        run: |
+          cd backend
+          bash ./scripts/deploy-prod.sh
+        env:
+          PORT: 3007
+          NODE_ENV: production
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: prod_like_db
+          JWT_SECRET: release_jwt_secret_for_ci
+          ENCRYPTION_KEY: release_encryption_key_for_ci
+          EXIT_AFTER_HEALTH: 'true'

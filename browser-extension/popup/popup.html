@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>AI ThreadStash</title>
+    <link rel="stylesheet" href="popup.css">
+    <script src="i18n.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI ThreadStash</h1>
+        </div>
+        
+        <div class="main-content">
+            <div id="platformInfo" class="platform-info">
+                <span class="platform-icon">🤖</span>
+                <span id="platformName" class="platform-name" data-i18n="detectingPlatform">检测平台中...</span>
+            </div>
+            
+            <div class="export-buttons">
+                <button id="exportChatGPT" class="export-button" data-platform="chatgpt">
+                    <span class="button-text" data-i18n="exportChatGPT">导出 ChatGPT 对话</span>
+                    <span class="button-icon">🤖</span>
+                </button>
+                <button id="exportDeepSeek" class="export-button" data-platform="deepseek">
+                    <span class="button-text" data-i18n="exportDeepSeek">导出 DeepSeek 对话</span>
+                    <span class="button-icon">🧠</span>
+                </button>
+                <button id="exportClaude" class="export-button" data-platform="claude">
+                    <span class="button-text" data-i18n="exportClaude">导出 Claude 对话</span>
+                    <span class="button-icon">🎭</span>
+                </button>
+                <button id="exportGemini" class="export-button" data-platform="gemini">
+                    <span class="button-text" data-i18n="exportGemini">导出 Gemini 对话</span>
+                    <span class="button-icon">✨</span>
+                </button>
+            </div>
+            
+            <div id="status" class="status-message" data-i18n="openSupportedPlatform">
+                请打开支持的对话平台
+            </div>
+        </div>
+        
+        <div class="footer">
+            <!-- 新增：与网站联动的快捷入口 -->
+            <button id="manageAccount" class="help-button">
+                <span class="button-icon">👤</span>
+                <span class="button-text">管理账户</span>
+            </button>
+            <button id="upgradePro" class="help-button">
+                <span class="button-icon">⚡</span>
+                <span class="button-text">升级到 Pro</span>
+            </button>
+            <button id="manageIntegrations" class="help-button">
+                <span class="button-icon">🧩</span>
+                <span class="button-text">集成设置</span>
+            </button>
+            <button id="helpLink" class="help-button">
+                <span class="button-icon">❓</span>
+                <span class="button-text" data-i18n="help">帮助</span>
+            </button>
+            <p class="version">v1.0.0</p>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

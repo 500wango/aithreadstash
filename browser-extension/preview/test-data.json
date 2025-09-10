@@ -1,0 +1,21 @@
+{
+  "title": "Gemini 导出预览 - 代码块与行内代码遮挡测试",
+  "exportedAt": "2025-09-01T12:00:00.000Z",
+  "url": "https://gemini.google.com/u/0/app",
+  "turns": [
+    {
+      "role": "user",
+      "content": {
+        "text": "请给我一段示例代码，并解释每一行的作用。",
+        "html": "<p>请给我一段示例代码，并解释每一行的作用。</p>"
+      }
+    },
+    {
+      "role": "assistant",
+      "content": {
+        "text": null,
+        "html": "<div class=\"response\"><p>下面是一个较长的代码块，用于测试是否会遮挡后续内容：</p><pre><code>function longTask() {\n  // Simulate a long running task\n  let sum = 0;\n  for (let i = 0; i &lt; 100000; i++) {\n    sum += i;\n  }\n  return sum;\n}\n\nfunction main() {\n  console.log('Start');\n  const result = longTask();\n  console.log('Result:', result);\n  console.log('Done');\n}\n\nmain();\n\n// 以下是一些额外的行，用于让代码块变高，观察是否遮挡：\n// line 1\n// line 2\n// line 3\n// line 4\n// line 5\n// line 6\n// line 7\n// line 8\n// line 9\n// line 10\n// line 11\n// line 12\n// line 13\n// line 14\n// line 15\n// line 16\n// line 17\n// line 18\n// line 19\n// line 20\n</code></pre><p>以上是代码块上方的说明。</p><ul><li>独特的 <code>class</code>：有没有像 <code>user_message</code>、<code>assistant_message</code>、<code>question</code> 这样的类名？</li><li><code>role</code> 属性：有没有像 <code>role=\"listitem\"</code> 或 <code>role=\"region\"</code> 这样的无障碍属性？这通常比class更稳定。</li><li>结构性特征：这条消息的 <code>div</code> 里面是否总包含一个代表头像的 <code><img></code> 元素？或者一个特定的SVG图标？</li></ul><p>下面是代码块下方的普通文本，用于验证代码块是否会遮挡本段文字。如果你能读到这段话，说明修复有效。</p></div>"
+      }
+    }
+  ]
+}

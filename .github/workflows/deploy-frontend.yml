@@ -1,0 +1,71 @@
+name: Deploy Frontend to VPS
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend-website/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy frontend over SSH to VPS
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: michael
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+
+            # Ensure node/npm/pm2 available in non-interactive shell (nvm or system install)
+            if [ -s "$HOME/.nvm/nvm.sh" ]; then
+              . "$HOME/.nvm/nvm.sh"
+              nvm use --silent default || true
+            fi
+            export PATH="$HOME/.local/bin:$PATH"
+
+            # Install pm2 globally if not present
+            if ! command -v pm2 >/dev/null 2>&1; then
+              npm i -g pm2
+            fi
+
+            # Go to deploy directory (must exist and owned by michael)
+            mkdir -p /srv/aithreadstash
+            cd /srv/aithreadstash
+
+            # Pull latest code if repo exists; otherwise clone this repo
+            if [ -d .git ]; then
+              git fetch --all
+              git reset --hard origin/main
+            else
+              git clone ${{ github.server_url }}/${{ github.repository }} .
+            fi
+
+            # Frontend: install dependencies and build
+            cd frontend-website
+            # Workaround for Next.js 15 which no longer supports next.config.ts
+            # We ship next.config.mjs in repo; remove the legacy TS config in production build context
+            if [ -f next.config.ts ]; then
+              echo "Removing unsupported next.config.ts for production build"
+              rm -f next.config.ts
+            fi
+            npm ci
+            npm run build
+
+            # Start or reload PM2 app
+            if pm2 list | grep -q "aithreadstash-web"; then
+              pm2 reload ecosystem.config.js --env production || pm2 restart aithreadstash-web --env production
+            else
+              pm2 start ecosystem.config.js --env production
+            fi
+
+            # Save PM2 state
+            pm2 save
