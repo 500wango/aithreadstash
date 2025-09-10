@@ -2,7 +2,7 @@ name: Deploy to Production Server
 
 on:
   push:
-    branches: [ "clean-main" ]
+    branches: [ "main" ]
     paths-ignore:
       - 'docs/**'
       - '*.md'
@@ -38,12 +38,12 @@ jobs:
             if [ -d .git ]; then
               echo "📦 Pulling latest code..."
               git fetch origin
-              git reset --hard origin/clean-main
+              git reset --hard origin/main
               git clean -fd
             else
               echo "📦 Cloning repository..."
               git clone https://github.com/500wango/aithreadstash.git .
-              git checkout clean-main
+              git checkout main
             fi
             
             # Backend deployment
