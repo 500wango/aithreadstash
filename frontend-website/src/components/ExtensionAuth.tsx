@@ -42,7 +42,7 @@ export default function ExtensionAuth() {
           // Send auth success message to extension
           if (accessToken && refreshToken) {
             try {
-              window.chrome.runtime.sendMessage(
+              window.chrome?.runtime?.sendMessage?.(
                 {
                   action: 'auth_success',
                   tokens: {

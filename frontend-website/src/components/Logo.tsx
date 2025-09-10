@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ApiService } from "@/lib/api";
 
 interface LogoProps {
   height?: number; // rendered height in px (defaults to 32)
