@@ -6,6 +6,10 @@ module.exports = {
       instances: 2,
       exec_mode: 'cluster',
       env: {
+        NODE_ENV: 'development',
+        PORT: 3007
+      },
+      env_production: {
         NODE_ENV: 'production',
         PORT: 3007
       },
