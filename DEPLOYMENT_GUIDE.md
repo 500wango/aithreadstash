@@ -191,7 +191,7 @@ cat ~/.ssh/aithreadstash_deploy_key
 ```bash
 # 在用户目录下载服务器设置脚本
 cd ~
-curl -o server-setup.sh https://raw.githubusercontent.com/500wango/aithreadstash/clean-main/scripts/server-setup.sh
+curl -o server-setup.sh https://raw.githubusercontent.com/500wango/aithreadstash/main/scripts/server-setup.sh
 
 # 给脚本执行权限
 chmod +x server-setup.sh
