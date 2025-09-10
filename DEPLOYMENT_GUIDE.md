@@ -189,10 +189,15 @@ cat ~/.ssh/aithreadstash_deploy_key
 在服务器上运行以下命令进行初始化：
 
 ```bash
-# 下载并执行服务器设置脚本
+# 在用户目录下载服务器设置脚本
+cd ~
 curl -o server-setup.sh https://raw.githubusercontent.com/500wango/aithreadstash/clean-main/scripts/server-setup.sh
+
+# 给脚本执行权限
 chmod +x server-setup.sh
-./server-setup.sh
+
+# 执行脚本（需要sudo权限）
+sudo ./server-setup.sh
 ```
 
 ## 第十步：Nginx 配置
