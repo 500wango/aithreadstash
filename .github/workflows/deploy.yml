@@ -1,60 +1,99 @@
-name: Deploy to VPS
+name: Deploy to Production Server
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "clean-main" ]
     paths-ignore:
-      - 'frontend-website/**'
-      - '.github/workflows/deploy-frontend.yml'
+      - 'docs/**'
+      - '*.md'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy over SSH to VPS
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy over SSH to Production Server
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: michael
-          key: ${{ secrets.VPS_SSH_KEY }}
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            # Ensure node/npm/pm2 available in non-interactive shell (nvm or system install)
-            if [ -s "$HOME/.nvm/nvm.sh" ]; then
-              . "$HOME/.nvm/nvm.sh"
-              # optional: choose a default node version if needed
-              nvm use --silent default || true
-            fi
-            export PATH="$HOME/.local/bin:$PATH"
-
-            # Install pm2 globally if not present
-            if ! command -v pm2 >/dev/null 2>&1; then
-              npm i -g pm2
-            fi
-
-            # Go to deploy directory (must exist and owned by michael)
-            cd /srv/aithreadstash
-
-            # Pull latest code if repo exists; otherwise clone this repo
+            echo "🚀 Starting deployment process..."
+            
+            # Set up environment
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            
+            # Go to deployment directory
+            DEPLOY_DIR="/opt/aithreadstash"
+            sudo mkdir -p $DEPLOY_DIR
+            sudo chown $USER:$USER $DEPLOY_DIR
+            cd $DEPLOY_DIR
+            
+            # Clone or pull latest code
             if [ -d .git ]; then
-              git fetch --all
-              git reset --hard origin/main
+              echo "📦 Pulling latest code..."
+              git fetch origin
+              git reset --hard origin/clean-main
+              git clean -fd
             else
-              git clone ${{ github.server_url }}/${{ github.repository }} .
+              echo "📦 Cloning repository..."
+              git clone https://github.com/500wango/aithreadstash.git .
+              git checkout clean-main
             fi
-
-            # Backend: install, build and run migrations
+            
+            # Backend deployment
+            echo "🔧 Deploying backend..."
             cd backend
-            npm ci
+            
+            # Install dependencies
+            npm ci --production
+            
+            # Build the application
             npm run build
+            
+            # Set up environment variables
+            if [ ! -f .env ]; then
+              cp .env.example .env
+              echo "⚠️  Please configure .env file with your production values"
+            fi
+            
+            # Run database migrations
+            echo "🗄️  Running database migrations..."
             npm run migration:run
-            pm2 start ecosystem.config.js --env production || true
-
-            # Frontend: install, build and start SSR
-            cd /srv/aithreadstash/frontend-website
-            npm ci
+            
+            # Start backend with PM2
+            echo "🚀 Starting backend service..."
+            npm install -g pm2
+            pm2 delete backend || true
+            pm2 start ecosystem.config.js --env production
+            
+            # Frontend deployment
+            echo "🔧 Deploying frontend..."
+            cd ../frontend-website
+            
+            # Install dependencies
+            npm ci --production
+            
+            # Build the application
             npm run build
-            pm2 start ecosystem.config.js --env production || true
-
-            # Save PM2 state
+            
+            # Start frontend with PM2
+            echo "🚀 Starting frontend service..."
+            pm2 delete frontend || true
+            pm2 start ecosystem.config.js --env production
+            
+            # Save PM2 configuration
             pm2 save
+            pm2 startup
+            
+            echo "✅ Deployment completed successfully!"
+            echo "🌐 Backend is running on: http://localhost:3001"
+            echo "🌐 Frontend is running on: http://localhost:3000"
+            
+            # Set up Nginx configuration (if needed)
+            echo "📋 Please configure Nginx to proxy requests to these ports"

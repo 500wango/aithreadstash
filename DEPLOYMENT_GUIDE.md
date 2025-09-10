@@ -138,6 +138,8 @@ sudo systemctl restart nginx
 - 访问 https://aithreadstash.com
 - 测试注册/登录功能
 - 验证API端点 https://api.aithreadstash.com/health
+- 测试浏览器扩展与后端的通信
+- 验证数据库连接和数据持久化
 
 ### 2. 监控设置
 ```bash
@@ -147,6 +149,79 @@ pm2 save
 
 # 配置日志轮转（可选）
 sudo nano /etc/logrotate.d/pm2
+```
+
+## 第八步：GitHub Secrets 配置指南
+
+### 必需配置的Secrets：
+
+1. **PRODUCTION_HOST**
+   - 值：您的服务器IP地址（如 `123.45.67.89`）或域名（如 `example.com`）
+
+2. **SSH_USERNAME**
+   - 值：SSH登录用户名（通常是 `root` 或您的用户名）
+
+3. **SSH_PRIVATE_KEY**
+   - 值：SSH私钥内容（完整的私钥，包括 `-----BEGIN RSA PRIVATE KEY-----` 和 `-----END RSA PRIVATE KEY-----`）
+
+### 配置步骤：
+
+1. 登录GitHub，进入您的仓库 `https://github.com/500wango/aithreadstash`
+2. 点击 "Settings" → "Secrets and variables" → "Actions"
+3. 点击 "New repository secret"
+4. 依次添加上述三个Secrets
+
+### 生成SSH密钥对（如果还没有）：
+
+```bash
+# 在本地生成新的SSH密钥对
+ssh-keygen -t rsa -b 4096 -C "aithreadstash-deployment" -f ~/.ssh/aithreadstash_deploy_key
+
+# 将公钥添加到服务器的 ~/.ssh/authorized_keys
+cat ~/.ssh/aithreadstash_deploy_key.pub | ssh your_username@your_server_ip "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
+# 将私钥内容复制到GitHub Secret SSH_PRIVATE_KEY
+cat ~/.ssh/aithreadstash_deploy_key
+```
+
+## 第九步：服务器初始化
+
+在服务器上运行以下命令进行初始化：
+
+```bash
+# 下载并执行服务器设置脚本
+curl -o server-setup.sh https://raw.githubusercontent.com/500wango/aithreadstash/clean-main/scripts/server-setup.sh
+chmod +x server-setup.sh
+./server-setup.sh
+```
+
+## 第十步：Nginx 配置
+
+创建Nginx配置文件：
+
+```bash
+sudo nano /etc/nginx/sites-available/aithreadstash
+```
+
+使用DEPLOYMENT.md中的配置模板，替换您的域名。
+
+## 第十一步：SSL证书配置
+
+```bash
+# 安装SSL证书
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+
+# 设置自动续订
+sudo crontab -e
+# 添加：0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+## 第十二步：触发自动部署
+
+配置完成后，向 clean-main 分支推送代码即可自动触发部署：
+
+```bash
+git push origin clean-main
 ```
 
 ## 📋 部署检查清单
